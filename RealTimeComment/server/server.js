@@ -32,6 +32,10 @@ io.on("connection", (socket) => {
     socket.broadcast.emit("receiveComment", comment);
   });
 
+  socket.on("deleteComment", (id) => {
+    socket.broadcast.emit("commentDeleted", id);
+  });
+
   socket.on("disconnect", () => {
     console.log("User disconnected:", socket.id);
   });

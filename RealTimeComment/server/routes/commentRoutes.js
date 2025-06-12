@@ -13,4 +13,14 @@ router.post("/", async (req, res) => {
   res.status(201).json(comment);
 });
 
+router.delete("/:id", async (req, res) => {
+  try {
+    const deleted = await Comment.findByIdAndDelete(req.params.id);
+    if (!deleted) return res.status(404).json({ message: "Not found" });
+    res.status(200).json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: "Delete failed" });
+  }
+});
+
 export default router;

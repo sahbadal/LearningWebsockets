@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { socket } from "./socket.js";
+import { socket } from "./socket";
 
 function App() {
   const [comments, setComments] = useState([]);
@@ -18,7 +18,14 @@ function App() {
       setComments(prev => [comment, ...prev]);
     });
 
-    return () => socket.off("receiveComment");
+    socket.on("commentDeleted", (id) => {
+      setComments(prev => prev.filter(c => c._id !== id));
+    });
+
+    return () => {
+      socket.off("receiveComment");
+      socket.off("commentDeleted");
+    };
   }, []);
 
   const handleSubmit = async (e) => {
@@ -32,10 +39,19 @@ function App() {
     };
 
     const res = await axios.post("http://localhost:5000/api/comments", newComment);
-
     setComments(prev => [res.data, ...prev]);
     socket.emit("newComment", res.data);
     setInput("");
+  };
+
+  const handleDelete = async (id) => {
+    try {
+      await axios.delete(`http://localhost:5000/api/comments/${id}`);
+      setComments(prev => prev.filter(c => c._id !== id));
+      socket.emit("deleteComment", id);
+    } catch (err) {
+      console.error("Delete failed", err);
+    }
   };
 
   const formatTime = (timestamp) => {
@@ -71,10 +87,28 @@ function App() {
 
         <div className="space-y-4 max-h-[500px] overflow-y-auto pr-2">
           {comments.map((c) => (
-            <div key={c._id} className="bg-indigo-50 p-4 rounded-lg shadow-sm">
+            <div key={c._id} className="group bg-indigo-50 p-4 rounded-lg shadow-sm">
               <div className="flex justify-between items-center">
                 <h4 className="font-semibold text-indigo-800">{c.username}</h4>
-                <span className="text-sm text-gray-500">{formatTime(c.createdAt)}</span>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-gray-500">{formatTime(c.createdAt)}</span>
+                  {c.username === username && (
+                    <button
+                      onClick={() => handleDelete(c._id)}
+                      className="ml-2 p-1 rounded-full hover:bg-red-100 transition group/delete"
+                      title="Delete comment"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-5 w-5 text-red-600 group-hover/delete:text-red-800 transition"
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                      >
+                        <path d="M9 3v1H4v2h16V4h-5V3H9zm-1 5v11h2V8H8zm4 0v11h2V8h-2zm4 0v11h2V8h-2z" />
+                      </svg>
+                    </button>
+                  )}
+                </div>
               </div>
               <p className="text-gray-700 mt-1">{c.content}</p>
             </div>
