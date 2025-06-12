@@ -2,17 +2,29 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="./public/style.css">
-    <title>Chat</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="./public/style.css" />
+    <title>Chat App</title>
 </head>
 
 <body>
-    <h1>Hello there</h1>
+    <div class="chat-container">
+        <div class="chat-header">
+            <span>👤 Chat</span>
+        </div>
 
+        <div class="chat-box">
 
-    <script src="./public/client.js"></script>
+        </div>
+
+        <div class="chat-input">
+            <textarea id="textarea" cols="30" rows="1" placeholder="Write a message..."></textarea>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/public/client.js"></script>
 </body>
 
 </html>
